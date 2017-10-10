@@ -75,6 +75,9 @@ mod tests {
         sub_hasher = hasher.clone();
         sub_hasher.write(".A".as_bytes());
         assert_eq!(0x28e34a7c, sub_hasher.finish());
+        sub_hasher = EtchHash::new_with_state(hasher.finish());
+        sub_hasher.write(".A".as_bytes());
+        assert_eq!(0x28e34a7c, sub_hasher.finish());
     }
 }
 
@@ -94,13 +97,16 @@ mod etch_hash {
         result
     }
 
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     pub struct EtchHash {
         state: u32,
     }
     impl EtchHash {
         pub fn new() -> EtchHash {
             EtchHash { state: 5381 }
+        }
+        pub fn new_with_state(state: u64) -> EtchHash {
+            EtchHash { state: state as u32 }
         }
     }
     impl Hasher for EtchHash {
