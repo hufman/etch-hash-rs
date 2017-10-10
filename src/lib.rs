@@ -81,7 +81,22 @@ mod tests {
     }
 }
 
-mod etch_hash {
+pub mod etch_hash {
+    /// ```
+    /// // Hasher Trait
+    /// use std::hash::Hasher;
+    /// use etch_hash::etch_hash::EtchHash;
+    /// let mut hasher = EtchHash::new();
+    /// hasher.write("Data to hash".as_bytes());
+    /// hasher.finish();
+    /// ```
+    /// ```
+    /// // Convenience static methods
+    /// use etch_hash::etch_hash::hash;
+    /// hash("Data to hash".as_bytes());
+    /// ```
+    ///
+
     use std::hash::Hasher;
     pub fn hash(data: &[u8]) -> u32 {
         return hash_more(5381, data);
