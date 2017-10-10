@@ -1,0 +1,6 @@
+[package]
+name = "etch-hash"
+version = "0.1.0"
+authors = ["Walter Huf <hufman@gmail.com>"]
+
+[dependencies]
