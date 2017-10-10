@@ -8,6 +8,7 @@
 #[cfg(test)]
 mod tests {
     use etch_hash::*;
+    use std::hash::Hasher;
 
     #[test]
     fn null() {
@@ -44,9 +45,41 @@ mod tests {
         assert_eq!(0x0972201e, hash_more(result, "._result_f".as_bytes()));
         assert_eq!(0x28e34a7c, hash_more(result, ".A".as_bytes()));
     }
+
+    #[test]
+    fn obj_null() {
+        let mut hasher = EtchHash::new();
+        hasher.write("".as_bytes());
+        assert_eq!(5381, hasher.finish());
+    }
+    #[test]
+    fn obj_single_letter() {
+        let mut hasher = EtchHash::new();
+        hasher.write("c".as_bytes());
+        assert_eq!(0x150a2c9e, hasher.finish());
+        hasher = EtchHash::new();
+        hasher.write("a".as_bytes());
+        assert_eq!(352988316, hasher.finish());
+    }
+    #[test]
+    fn obj_long_names_iterative() {
+        let mut hasher = EtchHash::new();
+        hasher.write("org.apache.etch.example.binary.binaryExample".as_bytes());
+        let mut sub_hasher;
+        sub_hasher = hasher.clone();
+        sub_hasher.write(".f".as_bytes());
+        assert_eq!(0x28e34aa1, sub_hasher.finish());
+        sub_hasher = hasher.clone();
+        sub_hasher.write("._result_f".as_bytes());
+        assert_eq!(0x0972201e, sub_hasher.finish());
+        sub_hasher = hasher.clone();
+        sub_hasher.write(".A".as_bytes());
+        assert_eq!(0x28e34a7c, sub_hasher.finish());
+    }
 }
 
 mod etch_hash {
+    use std::hash::Hasher;
     pub fn hash(data: &[u8]) -> u32 {
         return hash_more(5381, data);
     }
@@ -59,5 +92,23 @@ mod etch_hash {
             result = big_result as u32;
         }
         result
+    }
+
+    #[derive(Clone)]
+    pub struct EtchHash {
+        state: u32,
+    }
+    impl EtchHash {
+        pub fn new() -> EtchHash {
+            EtchHash { state: 5381 }
+        }
+    }
+    impl Hasher for EtchHash {
+        fn finish(&self) -> u64 {
+            self.state as u64
+        }
+        fn write(&mut self, bytes: &[u8]) {
+            self.state = hash_more(self.state, bytes);
+        }
     }
 }
